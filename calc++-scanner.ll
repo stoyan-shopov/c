@@ -53,13 +53,11 @@ WS  [ \t\v\n\f]
 #include <stdio.h>
 #include <string>
 
-extern void yyerror(const char *);  /* prints grammar violation message */
-
 extern int sym_type(const char *);  /* returns type from symbol table */
 
-#define sym_type(identifier) IDENTIFIER /* with no symbol table, fake it */
+#define sym_type(identifier) yy::calcxx_parser::token::TOK_IDENTIFIER /* with no symbol table, fake it */
 
-static void comment(void);
+static void comment(calcxx_driver & driver);
 static yy::calcxx_parser::symbol_type check_type(void);
 %}
 
@@ -84,7 +82,7 @@ static yy::calcxx_parser::symbol_type check_type(void);
 <<EOF>>    return yy::calcxx_parser::make_END(loc);
 
 
-"/*"                                    { comment(); }
+"/*"                                    { comment(driver); }
 "//".*                                    { /* consume //-comment */ }
 
 "auto"					{ return yy::calcxx_parser::make_AUTO(loc); }
@@ -172,7 +170,7 @@ static yy::calcxx_parser::symbol_type check_type(void);
 "=="					{ return yy::calcxx_parser::make_EQ_OP(loc); }
 "!="					{ return yy::calcxx_parser::make_NE_OP(loc); }
 ";"					{ return yy::calcxx_parser::make_SEMICOLON(loc); }
-("{"|"<%")				{ return yy::calcxx_parser::make_LCURLY_BRACE; }
+("{"|"<%")				{ return yy::calcxx_parser::make_LCURLY_BRACE(loc); }
 ("}"|"%>")				{ return yy::calcxx_parser::make_RCURLY_BRACE(loc); }
 ","					{ return yy::calcxx_parser::make_COMMA(loc); }
 ":"					{ return yy::calcxx_parser::make_COLON(loc); }
@@ -223,3 +221,35 @@ calcxx_driver::scan_end ()
   fclose (yyin);
 }
 
+
+static void comment(calcxx_driver & driver)
+{
+	int c;
+
+	while ((c = getchar()) != 0)
+		if (c == '*')
+		{
+			while ((c = getchar()) == '*')
+				;
+
+			if (c == '/')
+				return;
+
+			if (c == 0)
+				break;
+		}
+	driver.error("unterminated comment");
+}
+
+static yy::calcxx_parser::symbol_type check_type(void)
+{
+	switch (sym_type(yytext))
+	{
+		case yy::calcxx_parser::token::TOK_TYPEDEF_NAME:                /* previously defined */
+			return yy::calcxx_parser::make_TYPEDEF_NAME(loc);
+		case yy::calcxx_parser::token::TOK_ENUMERATION_CONSTANT:        /* previously defined */
+			return yy::calcxx_parser::make_ENUMERATION_CONSTANT(loc);
+		default:                          /* includes undefined */
+			return yy::calcxx_parser::make_IDENTIFIER(yytext, loc);
+	}
+}

@@ -26,6 +26,45 @@ blank [ \t]
   # define YY_USER_ACTION  loc.columns (yyleng);
 %}
 
+
+%e  1019
+%p  2807
+%n  371
+%k  284
+%a  1213
+%o  1117
+
+O   [0-7]
+D   [0-9]
+NZ  [1-9]
+L   [a-zA-Z_]
+A   [a-zA-Z_0-9]
+H   [a-fA-F0-9]
+HP  (0[xX])
+E   ([Ee][+-]?{D}+)
+P   ([Pp][+-]?{D}+)
+FS  (f|F|l|L)
+IS  (((u|U)(l|L|ll|LL)?)|((l|L|ll|LL)(u|U)?))
+CP  (u|U|L)
+SP  (u8|u|U|L)
+ES  (\\(['"\?\\abfnrtv]|[0-7]{1,3}|x[a-fA-F0-9]+))
+WS  [ \t\v\n\f]
+
+%{
+#include <stdio.h>
+#include <string>
+#include "grammar.hxx"
+
+extern void yyerror(const char *);  /* prints grammar violation message */
+
+extern int sym_type(const char *);  /* returns type from symbol table */
+
+#define sym_type(identifier) IDENTIFIER /* with no symbol table, fake it */
+
+static void comment(void);
+static int check_type(void);
+%}
+
 %%
 
 %{

@@ -169,7 +169,7 @@ multiplicative_expression
 additive_expression
 	: multiplicative_expression
 	| additive_expression "+" multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	| additive_expression "-" multiplicative_expression
 	;
 
 shift_expression
@@ -180,8 +180,8 @@ shift_expression
 
 relational_expression
 	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
+	| relational_expression "<" shift_expression
+	| relational_expression ">" shift_expression
 	| relational_expression LE_OP shift_expression
 	| relational_expression GE_OP shift_expression
 	;
@@ -194,17 +194,17 @@ equality_expression
 
 and_expression
 	: equality_expression
-	| and_expression '&' equality_expression
+	| and_expression "&" equality_expression
 	;
 
 exclusive_or_expression
 	: and_expression
-	| exclusive_or_expression '^' and_expression
+	| exclusive_or_expression "^" and_expression
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
+	| inclusive_or_expression "|" exclusive_or_expression
 	;
 
 logical_and_expression
@@ -219,7 +219,7 @@ logical_or_expression
 
 conditional_expression
 	: logical_or_expression
-	| logical_or_expression '?' expression ":" conditional_expression
+	| logical_or_expression "?" expression ":" conditional_expression
 	;
 
 assignment_expression
@@ -275,7 +275,7 @@ init_declarator_list
 	;
 
 init_declarator
-	: declarator '=' initializer
+	: declarator "=" initializer
 	| declarator
 	;
 
@@ -395,10 +395,10 @@ direct_declarator
 	: IDENTIFIER
 	| "(" declarator ")"
 	| direct_declarator "[" "]"
-	| direct_declarator "[" '*' "]"
+	| direct_declarator "[" "*" "]"
 	| direct_declarator "[" STATIC type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" STATIC assignment_expression "]"
-	| direct_declarator "[" type_qualifier_list '*' "]"
+	| direct_declarator "[" type_qualifier_list "*" "]"
 	| direct_declarator "[" type_qualifier_list STATIC assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list "]"
@@ -409,10 +409,10 @@ direct_declarator
 	;
 
 pointer
-	: '*' type_qualifier_list pointer
-	| '*' type_qualifier_list
-	| '*' pointer
-	| '*'
+	: "*" type_qualifier_list pointer
+	| "*" type_qualifier_list
+	| "*" pointer
+	| "*"
 	;
 
 type_qualifier_list
@@ -456,7 +456,7 @@ abstract_declarator
 direct_abstract_declarator
 	: "(" abstract_declarator ")"
 	| "[" "]"
-	| "[" '*' "]"
+	| "[" "*" "]"
 	| "[" STATIC type_qualifier_list assignment_expression "]"
 	| "[" STATIC assignment_expression "]"
 	| "[" type_qualifier_list STATIC assignment_expression "]"
@@ -464,7 +464,7 @@ direct_abstract_declarator
 	| "[" type_qualifier_list "]"
 	| "[" assignment_expression "]"
 	| direct_abstract_declarator "[" "]"
-	| direct_abstract_declarator "[" '*' "]"
+	| direct_abstract_declarator "[" "*" "]"
 	| direct_abstract_declarator "[" STATIC type_qualifier_list assignment_expression "]"
 	| direct_abstract_declarator "[" STATIC assignment_expression "]"
 	| direct_abstract_declarator "[" type_qualifier_list assignment_expression "]"
@@ -491,7 +491,7 @@ initializer_list
 	;
 
 designation
-	: designator_list '='
+	: designator_list "="
 	;
 
 designator_list

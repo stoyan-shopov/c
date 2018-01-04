@@ -75,23 +75,27 @@ class calcxx_driver;
 
 %token	ALIGNAS ALIGNOF ATOMIC GENERIC NORETURN STATIC_ASSERT THREAD_LOCAL
 
+%type <std::string> constant
+%type <std::string> string
+%type <std::string> primary_expression
+%type <std::string> postfix_expression
 
 %printer { yyoutput << $$; } <*>;
 %%
 %start translation_unit;
 
 primary_expression
-	: IDENTIFIER
-	| constant
-	| string
-	| "(" expression ")"
-	| generic_selection
+	: IDENTIFIER		{ $$ = $1; std::cout << "!!! identifier detected: " << $$ << std::endl; }
+	| constant		{ $$ = $1; }
+	| string		{ $$ = $1; }
+	| "(" expression ")"	{ $$ = "(<<<expression>>>)"; }
+	| generic_selection	{ $$ = "<<<generic-selection>>>"; }
 	;
 
 constant
-	: I_CONSTANT		/* includes character_constant */
-	| F_CONSTANT
-	| ENUMERATION_CONSTANT	/* after it has been defined as such */
+	: I_CONSTANT		/* includes character_constant */		{ $$ = "-1"; }
+	| F_CONSTANT								{ $$ = "-2"; }
+	| ENUMERATION_CONSTANT	/* after it has been defined as such */		{ $$ = "-3"; }
 	;
 
 enumeration_constant		/* before it has been defined as such */
@@ -99,8 +103,8 @@ enumeration_constant		/* before it has been defined as such */
 	;
 
 string
-	: STRING_LITERAL
-	| FUNC_NAME
+	: STRING_LITERAL	{ $$ = "<<<string-literal>>>"; }
+	| FUNC_NAME		{ $$ = "<<<func-name>>>"; }
 	;
 
 generic_selection
@@ -118,16 +122,16 @@ generic_association
 	;
 
 postfix_expression
-	: primary_expression
-	| postfix_expression "[" expression "]"
-	| postfix_expression "(" ")"
-	| postfix_expression "(" argument_expression_list ")"
-	| postfix_expression "." IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
-	| "(" type_name ")" "{" initializer_list "}"
-	| "(" type_name ")" "{" initializer_list "," "}"
+	: primary_expression					{ $$ = $1; }
+	| postfix_expression "[" expression "]"			{ $$ = $1 + " " + "<<<expression>>>" + " " + "[]" ; }
+	| postfix_expression "(" ")"				{ $$ = $1 + " " + "()"; }
+	| postfix_expression "(" argument_expression_list ")"	{ $$ = $1 + " " + "(<<<function-call-with-arguments>>>)"; }
+	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + ".member-access"; }
+	| postfix_expression PTR_OP IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + "->member-access"; }
+	| postfix_expression INC_OP				{ $$ = $1 + " " + "postfix++"; std::cout << "POSTFIX++ ID: " << $1 << std::endl; }
+	| postfix_expression DEC_OP				{ $$ = $1 + " " + "postfix--"; }
+	| "(" type_name ")" "{" initializer_list "}"		{ $$ = "<<<compound-literal>>>"; }
+	| "(" type_name ")" "{" initializer_list "," "}"	{ $$ = "<<<compound-literal>>>"; }
 	;
 
 argument_expression_list
@@ -136,7 +140,7 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression			{ std::cout << "postfix expression detected: " << $1 << std::endl; }
 	| INC_OP unary_expression
 	| DEC_OP unary_expression
 	| unary_operator cast_expression

@@ -240,6 +240,7 @@ static yy::calcxx_parser::symbol_type check_type(void)
 		case yy::calcxx_parser::token::TOK_ENUMERATION_CONSTANT:        /* previously defined */
 			return yy::calcxx_parser::make_ENUMERATION_CONSTANT(loc);
 		default:                          /* includes undefined */
+			
 			return yy::calcxx_parser::make_IDENTIFIER(yytext, loc);
 	}
 }

@@ -8,6 +8,7 @@
 %code requires
 {
 # include <string>
+# include <sstream>
 class calcxx_driver;
 }
 // The parsing context.
@@ -54,7 +55,7 @@ class calcxx_driver;
 
 ;
 %token <std::string> IDENTIFIER "identifier"
-%token <unsigned long long> I_CONSTANT "integer_constant"
+%token <signed long long> I_CONSTANT "integer_constant"
 %token  F_CONSTANT
 %token  STRING_LITERAL
 %token  FUNC_NAME
@@ -93,7 +94,7 @@ primary_expression
 	;
 
 constant
-	: I_CONSTANT		/* includes character_constant */		{ $$ = "-1"; }
+	: I_CONSTANT		/* includes character_constant */		{ std::stringstream ss(" "); ss << $1; $$ = ss.str(); }
 	| F_CONSTANT								{ $$ = "-2"; }
 	| ENUMERATION_CONSTANT	/* after it has been defined as such */		{ $$ = "-3"; }
 	;

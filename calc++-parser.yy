@@ -54,7 +54,7 @@ class calcxx_driver;
 
 ;
 %token <std::string> IDENTIFIER "identifier"
-%token  I_CONSTANT
+%token <unsigned long long> I_CONSTANT "integer_constant"
 %token  F_CONSTANT
 %token  STRING_LITERAL
 %token  FUNC_NAME

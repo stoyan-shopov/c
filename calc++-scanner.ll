@@ -16,7 +16,7 @@
 // The location of the current token.
 static yy::location loc;
 %}
-%option noyywrap nounput batch debug noinput
+%option noyywrap nounput batch debug
 blank [ \t]
 
 %{
@@ -56,7 +56,6 @@ extern int sym_type(const char *);  /* returns type from symbol table */
 
 #define sym_type(identifier) yy::calcxx_parser::token::TOK_IDENTIFIER /* with no symbol table, fake it */
 
-static void comment(calcxx_driver & driver);
 static yy::calcxx_parser::symbol_type check_type(void);
 %}
 
@@ -72,7 +71,50 @@ static yy::calcxx_parser::symbol_type check_type(void);
 <<EOF>>    return yy::calcxx_parser::make_END(loc);
 
 
-"/*"                                    { comment(driver); }
+"/*"        {
+            int c;
+
+            for ( ; ; )
+                {
+                while ( (c = yyinput()) != '*' &&
+                        c != EOF )
+		{
+			/* eat up text of comment */
+			loc.columns(1);
+			if (c == '\n')
+			{
+				loc.lines(1);
+			}
+			loc.step();
+		}
+
+                if ( c == '*' )
+                    {
+			    loc.columns(1);
+                    while ( (c = yyinput()) != EOF )
+		    {
+			    loc.columns(1);
+			    if (c == '\n')
+			    {
+				    loc.lines(1);
+			    }
+			    loc.step();
+			    if (c != '*')
+				    break;
+		    }
+                    if ( c == '/' )
+                        break;    /* found the end */
+                    }
+
+                if ( c == EOF )
+                    {
+                    driver.error( "EOF in comment" );
+                    break;
+                    }
+                }
+            }
+
+
 "//".*                                    { /* consume //-comment */ }
 
 "auto"					{ return yy::calcxx_parser::make_AUTO(loc); }
@@ -211,25 +253,6 @@ calcxx_driver::scan_end ()
   fclose (yyin);
 }
 
-
-static void comment(calcxx_driver & driver)
-{
-	int c;
-
-	while ((c = getchar()) != 0)
-		if (c == '*')
-		{
-			while ((c = getchar()) == '*')
-				;
-
-			if (c == '/')
-				return;
-
-			if (c == 0)
-				break;
-		}
-	driver.error("unterminated comment");
-}
 
 static yy::calcxx_parser::symbol_type check_type(void)
 {

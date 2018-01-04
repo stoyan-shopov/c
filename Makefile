@@ -1,6 +1,6 @@
 
 all:
-	bison -d -v -Werror -Wall -Wno-yacc --report=all -o calc++-parser.cc calc++-parser.yy
+	bison -d -v -Wall -Wno-yacc --report=all -o calc++-parser.cc calc++-parser.yy
 	flex -o calc++-scanner.cc calc++-scanner.ll
 	g++ -g *.cc -o calc++
 

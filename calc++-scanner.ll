@@ -17,7 +17,6 @@
 static yy::location loc;
 %}
 %option noyywrap nounput batch debug noinput
-int   [0-9]+
 blank [ \t]
 
 %{
@@ -70,15 +69,6 @@ static yy::calcxx_parser::symbol_type check_type(void);
 
 {blank}+   loc.step ();
 [\n]+      loc.lines (yyleng); loc.step ();
-
-{int}      {
-  errno = 0;
-  long n = strtol (yytext, NULL, 10);
-  if (! (INT_MIN <= n && n <= INT_MAX && errno != ERANGE))
-    driver.error (loc, "integer is out of range");
-  return yy::calcxx_parser::make_NUMBER(n, loc);
-}
-
 <<EOF>>    return yy::calcxx_parser::make_END(loc);
 
 

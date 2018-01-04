@@ -37,7 +37,7 @@ class calcxx_driver;
 	SEMICOLON	";"
 	LCURLY_BRACE	"{"
 	RCURLY_BRACE	"}"
-	COMMA	"'"
+	COMMA	","
 	COLON	":"
 	LSQUARE_BRACKET	"["
 	RSQUARE_BRACKET	"]"
@@ -232,7 +232,7 @@ assignment_expression
 	;
 
 assignment_operator
-	: '='
+	: "="
 	| MUL_ASSIGN
 	| DIV_ASSIGN
 	| MOD_ASSIGN
@@ -365,7 +365,7 @@ enumerator_list
 	;
 
 enumerator	/* identifiers must be flagged as ENUMERATION_CONSTANT */
-	: enumeration_constant '=' constant_expression
+	: enumeration_constant "=" constant_expression
 	| enumeration_constant
 	;
 

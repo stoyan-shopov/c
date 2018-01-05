@@ -55,6 +55,7 @@ class calcxx_driver;
 
 ;
 %token <std::string> IDENTIFIER "identifier"
+%token <std::string> TYPEDEF_NAME "typedef_name"
 %token <signed long long> I_CONSTANT "integer_constant"
 %token  F_CONSTANT
 %token  STRING_LITERAL
@@ -64,7 +65,7 @@ class calcxx_driver;
 %token	AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token	SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token	XOR_ASSIGN OR_ASSIGN
-%token	TYPEDEF_NAME ENUMERATION_CONSTANT
+%token	ENUMERATION_CONSTANT
 
 %token	TYPEDEF EXTERN STATIC AUTO REGISTER INLINE
 %token	CONST RESTRICT VOLATILE
@@ -98,6 +99,10 @@ class calcxx_driver;
 %type <std::string> assignment_operator
 %type <std::string> assignment_expression
 %type <std::string> expression
+
+%type <std::string> type_qualifier
+%type <std::string> type_specifier
+%type <std::string> atomic_type_specifier
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -312,19 +317,19 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID
-	| CHAR
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
-	| BOOL
-	| COMPLEX
-	| IMAGINARY	  	/* non-mandated extension */
-	| atomic_type_specifier
+	: VOID				{ $$ = ">>void"; }
+	| CHAR				{ $$ = ">>char"; }
+	| SHORT				{ $$ = ">>short"; }
+	| INT				{ $$ = ">>int"; }
+	| LONG				{ $$ = ">>long"; }
+	| FLOAT				{ $$ = ">>float"; }
+	| DOUBLE			{ $$ = ">>double"; }
+	| SIGNED			{ $$ = ">>signed"; }
+	| UNSIGNED			{ $$ = ">>unsigned"; }
+	| BOOL				{ $$ = ">>bool"; }
+	| COMPLEX			{ $$ = ">>complex"; }
+	| IMAGINARY	  	/* non-mandated extension */	{ $$ = ">>imaginary"; }
+	| atomic_type_specifier		{ $$ = $1; }
 	| struct_or_union_specifier
 	| enum_specifier
 	| TYPEDEF_NAME		/* after it has been defined as such */
@@ -389,14 +394,14 @@ enumerator	/* identifiers must be flagged as ENUMERATION_CONSTANT */
 	;
 
 atomic_type_specifier
-	: ATOMIC "(" type_name ")"
+	: ATOMIC "(" type_name ")"	{ $$ = "type{" + $3 + "}" + " " + ">>atomic"; }
 	;
 
 type_qualifier
-	: CONST
-	| RESTRICT
-	| VOLATILE
-	| ATOMIC
+	: CONST		{ $$ = ">const"; }
+	| RESTRICT	{ $$ = ">restrict"; }
+	| VOLATILE	{ $$ = ">volatile"; }
+	| ATOMIC	{ $$ = ">atomic"; }
 	;
 
 function_specifier

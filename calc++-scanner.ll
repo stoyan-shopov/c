@@ -259,7 +259,7 @@ static yy::calcxx_parser::symbol_type check_type(void)
 	switch (sym_type(yytext))
 	{
 		case yy::calcxx_parser::token::TOK_TYPEDEF_NAME:                /* previously defined */
-			return yy::calcxx_parser::make_TYPEDEF_NAME(loc);
+			return yy::calcxx_parser::make_TYPEDEF_NAME(std::string("typedef\"") + yytext + "\"", loc);
 		case yy::calcxx_parser::token::TOK_ENUMERATION_CONSTANT:        /* previously defined */
 			return yy::calcxx_parser::make_ENUMERATION_CONSTANT(loc);
 		default:                          /* includes undefined */

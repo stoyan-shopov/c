@@ -80,13 +80,17 @@ class calcxx_driver;
 %type <std::string> string
 %type <std::string> primary_expression
 %type <std::string> postfix_expression
+%type <std::string> unary_operator
+%type <std::string> unary_expression
+%type <std::string> type_name
+%type <std::string> cast_expression
 
 %printer { yyoutput << $$; } <*>;
 %%
 %start translation_unit;
 
 primary_expression
-	: IDENTIFIER		{ $$ = $1; std::cout << "!!! identifier detected: " << $$ << std::endl; }
+	: IDENTIFIER		{ $$ = $1; }
 	| constant		{ $$ = $1; }
 	| string		{ $$ = $1; }
 	| "(" expression ")"	{ $$ = "(<<<expression>>>)"; }
@@ -129,7 +133,7 @@ postfix_expression
 	| postfix_expression "(" argument_expression_list ")"	{ $$ = $1 + " " + "(<<<function-call-with-arguments>>>)"; }
 	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + ".member-access"; }
 	| postfix_expression PTR_OP IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + "->member-access"; }
-	| postfix_expression INC_OP				{ $$ = $1 + " " + "postfix++"; std::cout << "POSTFIX++ ID: " << $1 << std::endl; }
+	| postfix_expression INC_OP				{ $$ = $1 + " " + "postfix++"; }
 	| postfix_expression DEC_OP				{ $$ = $1 + " " + "postfix--"; }
 	| "(" type_name ")" "{" initializer_list "}"		{ $$ = "<<<compound-literal>>>"; }
 	| "(" type_name ")" "{" initializer_list "," "}"	{ $$ = "<<<compound-literal>>>"; }
@@ -141,31 +145,31 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression			{ std::cout << "postfix expression detected: " << $1 << std::endl; }
-	| INC_OP unary_expression
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF "(" type_name ")"
-	| ALIGNOF "(" type_name ")"
+	: postfix_expression			{ $$ = $1; }
+	| INC_OP unary_expression		{ $$ = "lval\"" + $2 + "\"" + " " + "prefix++"; }
+	| DEC_OP unary_expression		{ $$ = "lval\"" + $2 + "\"" + " " + "prefix--"; }
+	| unary_operator cast_expression	{ $$ = "val\"" + $2 + "\"" + " " + $1; }
+	| SIZEOF unary_expression		{ $$ = "type\"" + $2 + "\"" + " " + "sizeof"; }
+	| SIZEOF "(" type_name ")"		{ $$ = "type\"" + $3 + "\"" + " " + "sizeof"; }
+	| ALIGNOF "(" type_name ")"		{ $$ = "type\"" + $3 + "\"" + " " + "alignof"; }
 	;
 
 unary_operator
-	: "&"
-	| "*"
-	| "+"
-	| "-"
-	| "~"
-	| "!"
+	: "&"	{ $$ = "unary-&"; }
+	| "*"	{ $$ = "unary-*"; }
+	| "+"	{ $$ = "unary-+"; }
+	| "-"	{ $$ = "unary--"; }
+	| "~"	{ $$ = "unary-~"; }
+	| "!"	{ $$ = "unary-!"; }
 	;
 
 cast_expression
-	: unary_expression
-	| "(" type_name ")" cast_expression
+	: unary_expression			{ $$ = $1; }
+	| "(" type_name ")" cast_expression	{ $$ = "val\"" + $4 + "\"" + " " + " type\"" + $2 + "\"" + " " + "type-cast"; }
 	;
 
 multiplicative_expression
-	: cast_expression
+	: cast_expression					{ std::cout << "cast expression detected: " << $1 << std::endl; }
 	| multiplicative_expression "*" cast_expression
 	| multiplicative_expression "/" cast_expression
 	| multiplicative_expression "%" cast_expression
@@ -448,8 +452,8 @@ identifier_list
 	;
 
 type_name
-	: specifier_qualifier_list abstract_declarator
-	| specifier_qualifier_list
+	: specifier_qualifier_list abstract_declarator		{ $$ = "<<<type-name>>>"; }
+	| specifier_qualifier_list				{ $$ = "<<<type-name>>>"; }
 	;
 
 abstract_declarator

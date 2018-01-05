@@ -107,7 +107,7 @@ primary_expression
 	: IDENTIFIER		{ $$ = $1; }
 	| constant		{ $$ = $1; }
 	| string		{ $$ = $1; }
-	| "(" expression ")"	{ $$ = "(<<<expression>>>)"; }
+	| "(" expression ")"	{ $$ = "val\"" + $2 + "\""; }
 	| generic_selection	{ $$ = "<<<generic-selection>>>"; }
 	;
 
@@ -145,10 +145,10 @@ postfix_expression
 	| postfix_expression "[" expression "]"			{ $$ = $1 + " " + $3 + " " + "[]" ; }
 	| postfix_expression "(" ")"				{ $$ = $1 + " " + "()"; }
 	| postfix_expression "(" argument_expression_list ")"	{ $$ = $1 + " " + "(<<<function-call-with-arguments>>>)"; }
-	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + ".member-access"; }
-	| postfix_expression PTR_OP IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + "->member-access"; }
-	| postfix_expression INC_OP				{ $$ = $1 + " " + "postfix++"; }
-	| postfix_expression DEC_OP				{ $$ = $1 + " " + "postfix--"; }
+	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + $3 + " " + ".member-access"; }
+	| postfix_expression PTR_OP IDENTIFIER			{ $$ = $1 + " " + $3 + " " + "->member-access"; }
+	| postfix_expression INC_OP				{ $$ = "lval\"" + $1 + "\"" + " " + "postfix++"; }
+	| postfix_expression DEC_OP				{ $$ = "lval\"" + $1 + "\"" + " " + "postfix--"; }
 	| "(" type_name ")" "{" initializer_list "}"		{ $$ = "<<<compound-literal>>>"; }
 	| "(" type_name ")" "{" initializer_list "," "}"	{ $$ = "<<<compound-literal>>>"; }
 	;

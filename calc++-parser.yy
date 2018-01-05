@@ -84,6 +84,20 @@ class calcxx_driver;
 %type <std::string> unary_expression
 %type <std::string> type_name
 %type <std::string> cast_expression
+%type <std::string> multiplicative_expression
+%type <std::string> additive_expression
+%type <std::string> shift_expression
+%type <std::string> relational_expression
+%type <std::string> equality_expression
+%type <std::string> and_expression
+%type <std::string> exclusive_or_expression
+%type <std::string> inclusive_or_expression
+%type <std::string> logical_and_expression
+%type <std::string> logical_or_expression
+%type <std::string> conditional_expression
+%type <std::string> assignment_operator
+%type <std::string> assignment_expression
+%type <std::string> expression
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -128,7 +142,7 @@ generic_association
 
 postfix_expression
 	: primary_expression					{ $$ = $1; }
-	| postfix_expression "[" expression "]"			{ $$ = $1 + " " + "<<<expression>>>" + " " + "[]" ; }
+	| postfix_expression "[" expression "]"			{ $$ = $1 + " " + $3 + " " + "[]" ; }
 	| postfix_expression "(" ")"				{ $$ = $1 + " " + "()"; }
 	| postfix_expression "(" argument_expression_list ")"	{ $$ = $1 + " " + "(<<<function-call-with-arguments>>>)"; }
 	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + ".id\"" + $3 + "\"" + " " + ".member-access"; }
@@ -169,90 +183,90 @@ cast_expression
 	;
 
 multiplicative_expression
-	: cast_expression					{ std::cout << "cast expression detected: " << $1 << std::endl; }
-	| multiplicative_expression "*" cast_expression
-	| multiplicative_expression "/" cast_expression
-	| multiplicative_expression "%" cast_expression
+	: cast_expression					{ $$ = $1; }
+	| multiplicative_expression "*" cast_expression		{ $$ = $1 + " " + $3 + " " + "*"; }
+	| multiplicative_expression "/" cast_expression		{ $$ = $1 + " " + $3 + " " + "/"; }
+	| multiplicative_expression "%" cast_expression		{ $$ = $1 + " " + $3 + " " + "%"; }
 	;
 
 additive_expression
-	: multiplicative_expression
-	| additive_expression "+" multiplicative_expression
-	| additive_expression "-" multiplicative_expression
+	: multiplicative_expression				{ $$ = $1; }
+	| additive_expression "+" multiplicative_expression	{ $$ = $1 + " " + $3 + " " + "+"; }
+	| additive_expression "-" multiplicative_expression	{ $$ = $1 + " " + $3 + " " + "-"; }
 	;
 
 shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	: additive_expression					{ $$ = $1; }
+	| shift_expression LEFT_OP additive_expression		{ $$ = $1 + " " + $3 + " " + "lshift"; }
+	| shift_expression RIGHT_OP additive_expression		{ $$ = $1 + " " + $3 + " " + "rshift"; }
 	;
 
 relational_expression
-	: shift_expression
-	| relational_expression "<" shift_expression
-	| relational_expression ">" shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	: shift_expression				{ $$ = $1; }
+	| relational_expression "<" shift_expression	{ $$ = $1 + " " + $3 + " " + "<"; }
+	| relational_expression ">" shift_expression	{ $$ = $1 + " " + $3 + " " + ">"; }
+	| relational_expression LE_OP shift_expression	{ $$ = $1 + " " + $3 + " " + "<="; }
+	| relational_expression GE_OP shift_expression	{ $$ = $1 + " " + $3 + " " + ">="; }
 	;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	: relational_expression					{ $$ = $1; }
+	| equality_expression EQ_OP relational_expression	{ $$ = $1 + " " + $3 + " " + "=="; }
+	| equality_expression NE_OP relational_expression	{ $$ = $1 + " " + $3 + " " + "!="; }
 	;
 
 and_expression
-	: equality_expression
-	| and_expression "&" equality_expression
+	: equality_expression				{ $$ = $1; }
+	| and_expression "&" equality_expression	{ $$ = $1 + " " + $3 + " " + "&"; }
 	;
 
 exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression "^" and_expression
+	: and_expression				{ $$ = $1; }
+	| exclusive_or_expression "^" and_expression	{ $$ = $1 + " " + $3 + " " + "^"; }
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression "|" exclusive_or_expression
+	: exclusive_or_expression				{ $$ = $1; }
+	| inclusive_or_expression "|" exclusive_or_expression	{ $$ = $1 + " " + $3 + " " + "|"; }
 	;
 
 logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
+	: inclusive_or_expression					{ $$ = $1; }
+	| logical_and_expression AND_OP inclusive_or_expression		{ $$ = $1 + " " + $3 + " " + "&&"; }
 	;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
+	: logical_and_expression				{ $$ = $1; }
+	| logical_or_expression OR_OP logical_and_expression	{ $$ = $1 + " " + $3 + " " + "||"; }
 	;
 
 conditional_expression
-	: logical_or_expression
-	| logical_or_expression "?" expression ":" conditional_expression
+	: logical_or_expression							{ $$ = $1; }
+	| logical_or_expression "?" expression ":" conditional_expression	{ $$ = $1 + " " + "[if]" + " " + $3 + " " + "[else]" + " " + $5 + " " + "[then]"; }
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression					{ $$ = $1; }
+	| unary_expression assignment_operator assignment_expression	{ $$ = "lval\"" + $1 + "\"" + " " + "val\"" + $3 + "\"" + " " + $2; }
 	;
 
 assignment_operator
-	: "="
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: "="			{ $$ = "store!"; }
+	| MUL_ASSIGN		{ $$ = "*-store!"; }
+	| DIV_ASSIGN		{ $$ = "/-store!"; }
+	| MOD_ASSIGN		{ $$ = "mod-store!"; }
+	| ADD_ASSIGN		{ $$ = "+-store!"; }
+	| SUB_ASSIGN		{ $$ = "minus-store!"; }
+	| LEFT_ASSIGN		{ $$ = "lshift-store!"; }
+	| RIGHT_ASSIGN		{ $$ = "rshift-store!"; }
+	| AND_ASSIGN		{ $$ = "and-store!"; }
+	| XOR_ASSIGN		{ $$ = "xor-store!"; }
+	| OR_ASSIGN		{ $$ = "or-store!"; }
 	;
 
 expression
-	: assignment_expression
-	| expression "," assignment_expression
+	: assignment_expression				{ $$ = $1; }
+	| expression "," assignment_expression		{ $$ = $1 + " " + ",,,,,,,," + " " + $3; }
 	;
 
 constant_expression
@@ -549,7 +563,7 @@ block_item
 
 expression_statement
 	: ";"
-	| expression ";"
+	| expression ";"	{ std::cout << "expression statement detected: " << $1 << std::endl; }
 	;
 
 selection_statement

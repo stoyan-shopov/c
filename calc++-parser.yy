@@ -107,7 +107,7 @@ primary_expression
 	: IDENTIFIER		{ $$ = $1; }
 	| constant		{ $$ = $1; }
 	| string		{ $$ = $1; }
-	| "(" expression ")"	{ $$ = "val\"" + $2 + "\""; }
+	| "(" expression ")"	{ $$ = "val{" + $2 + "}"; }
 	| generic_selection	{ $$ = "<<<generic-selection>>>"; }
 	;
 
@@ -147,8 +147,8 @@ postfix_expression
 	| postfix_expression "(" argument_expression_list ")"	{ $$ = $1 + " " + "(<<<function-call-with-arguments>>>)"; }
 	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + $3 + " " + ".member-access"; }
 	| postfix_expression PTR_OP IDENTIFIER			{ $$ = $1 + " " + $3 + " " + "->member-access"; }
-	| postfix_expression INC_OP				{ $$ = "lval\"" + $1 + "\"" + " " + "postfix++"; }
-	| postfix_expression DEC_OP				{ $$ = "lval\"" + $1 + "\"" + " " + "postfix--"; }
+	| postfix_expression INC_OP				{ $$ = "lval{" + $1 + "}" + " " + "postfix++"; }
+	| postfix_expression DEC_OP				{ $$ = "lval{" + $1 + "}" + " " + "postfix--"; }
 	| "(" type_name ")" "{" initializer_list "}"		{ $$ = "<<<compound-literal>>>"; }
 	| "(" type_name ")" "{" initializer_list "," "}"	{ $$ = "<<<compound-literal>>>"; }
 	;
@@ -160,12 +160,12 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression			{ $$ = $1; }
-	| INC_OP unary_expression		{ $$ = "lval\"" + $2 + "\"" + " " + "prefix++"; }
-	| DEC_OP unary_expression		{ $$ = "lval\"" + $2 + "\"" + " " + "prefix--"; }
-	| unary_operator cast_expression	{ $$ = "val\"" + $2 + "\"" + " " + $1; }
-	| SIZEOF unary_expression		{ $$ = "type\"" + $2 + "\"" + " " + "sizeof"; }
-	| SIZEOF "(" type_name ")"		{ $$ = "type\"" + $3 + "\"" + " " + "sizeof"; }
-	| ALIGNOF "(" type_name ")"		{ $$ = "type\"" + $3 + "\"" + " " + "alignof"; }
+	| INC_OP unary_expression		{ $$ = "lval{" + $2 + "}" + " " + "prefix++"; }
+	| DEC_OP unary_expression		{ $$ = "lval{" + $2 + "}" + " " + "prefix--"; }
+	| unary_operator cast_expression	{ $$ = "val{" + $2 + "}" + " " + $1; }
+	| SIZEOF unary_expression		{ $$ = "type{" + $2 + "}" + " " + "sizeof"; }
+	| SIZEOF "(" type_name ")"		{ $$ = "type{" + $3 + "}" + " " + "sizeof"; }
+	| ALIGNOF "(" type_name ")"		{ $$ = "type{" + $3 + "}" + " " + "alignof"; }
 	;
 
 unary_operator
@@ -179,7 +179,7 @@ unary_operator
 
 cast_expression
 	: unary_expression			{ $$ = $1; }
-	| "(" type_name ")" cast_expression	{ $$ = "val\"" + $4 + "\"" + " " + " type\"" + $2 + "\"" + " " + "type-cast"; }
+	| "(" type_name ")" cast_expression	{ $$ = "val{" + $4 + "}" + " " + " type{" + $2 + "}" + " " + "type-cast"; }
 	;
 
 multiplicative_expression
@@ -247,7 +247,7 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression					{ $$ = $1; }
-	| unary_expression assignment_operator assignment_expression	{ $$ = "lval\"" + $1 + "\"" + " " + "val\"" + $3 + "\"" + " " + $2; }
+	| unary_expression assignment_operator assignment_expression	{ $$ = "lval{" + $1 + "}" + " " + "val{" + $3 + "}" + " " + $2; }
 	;
 
 assignment_operator

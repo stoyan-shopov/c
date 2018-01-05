@@ -103,6 +103,13 @@ class calcxx_driver;
 %type <std::string> type_qualifier
 %type <std::string> type_specifier
 %type <std::string> atomic_type_specifier
+%type <std::string> struct_or_union
+%type <std::string> struct_or_union_specifier
+%type <std::string> specifier_qualifier_list
+%type <std::string> storage_class_specifier
+%type <std::string> function_specifier
+%type <std::string> declaration_specifiers
+%type <std::string> alignment_specifier
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -285,16 +292,16 @@ declaration
 	;
 
 declaration_specifiers
-	: storage_class_specifier declaration_specifiers
-	| storage_class_specifier
-	| type_specifier declaration_specifiers
-	| type_specifier
-	| type_qualifier declaration_specifiers
-	| type_qualifier
-	| function_specifier declaration_specifiers
-	| function_specifier
-	| alignment_specifier declaration_specifiers
-	| alignment_specifier
+	: storage_class_specifier declaration_specifiers	{ $$ = $2 + " " + $1; }
+	| storage_class_specifier				{ $$ = $1; }
+	| type_specifier declaration_specifiers			{ $$ = $2 + " " + $1; }
+	| type_specifier					{ $$ = $1; }
+	| type_qualifier declaration_specifiers			{ $$ = $2 + " " + $1; }
+	| type_qualifier					{ $$ = $1; }
+	| function_specifier declaration_specifiers		{ $$ = $2 + " " + $1; }
+	| function_specifier					{ $$ = $1; }
+	| alignment_specifier declaration_specifiers		{ $$ = $2 + " " + $1; }
+	| alignment_specifier					{ $$ = $1; }
 	;
 
 init_declarator_list
@@ -308,12 +315,12 @@ init_declarator
 	;
 
 storage_class_specifier
-	: TYPEDEF	/* identifiers must be flagged as TYPEDEF_NAME */
-	| EXTERN
-	| STATIC
-	| THREAD_LOCAL
-	| AUTO
-	| REGISTER
+	: TYPEDEF	/* identifiers must be flagged as TYPEDEF_NAME */	{ $$ = ">>>typedef"; }
+	| EXTERN	{ $$ = ">>>extern"; }
+	| STATIC	{ $$ = ">>>static"; }
+	| THREAD_LOCAL	{ $$ = ">>>thread-local"; }
+	| AUTO		{ $$ = ">>>auto"; }
+	| REGISTER	{ $$ = ">>>register"; }
 	;
 
 type_specifier
@@ -330,20 +337,20 @@ type_specifier
 	| COMPLEX			{ $$ = ">>complex"; }
 	| IMAGINARY	  	/* non-mandated extension */	{ $$ = ">>imaginary"; }
 	| atomic_type_specifier		{ $$ = $1; }
-	| struct_or_union_specifier
+	| struct_or_union_specifier	{ $$ = $1; }
 	| enum_specifier
-	| TYPEDEF_NAME		/* after it has been defined as such */
+	| TYPEDEF_NAME		/* after it has been defined as such */	{ $$ = $1; }
 	;
 
 struct_or_union_specifier
-	: struct_or_union "{" struct_declaration_list "}"
-	| struct_or_union IDENTIFIER "{" struct_declaration_list "}"
-	| struct_or_union IDENTIFIER
+	: struct_or_union "{" struct_declaration_list "}"		{ $$ = std::string("aggregate{...}") + " " + $1; }
+	| struct_or_union IDENTIFIER "{" struct_declaration_list "}"	{ $$ = std::string("aggregate{...}") + " " + $2 + " " + $1; }
+	| struct_or_union IDENTIFIER					{ $$ = $2 + " " + $1; }
 	;
 
 struct_or_union
-	: STRUCT
-	| UNION
+	: STRUCT	{ $$ = "struct"; }
+	| UNION		{ $$ = "union"; }
 	;
 
 struct_declaration_list
@@ -358,10 +365,10 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
+	: type_specifier specifier_qualifier_list	{ $$ = $2 + " " + $1; }
+	| type_specifier				{ $$ = $1; }
+	| type_qualifier specifier_qualifier_list	{ $$ = $2 + " " + $1; }
+	| type_qualifier				{ $$ = $1; }
 	;
 
 struct_declarator_list
@@ -405,13 +412,13 @@ type_qualifier
 	;
 
 function_specifier
-	: INLINE
-	| NORETURN
+	: INLINE	{ $$ = ">>>>inline;"; }
+	| NORETURN	{ $$ = ">>>>noreturn;"; }
 	;
 
 alignment_specifier
-	: ALIGNAS "(" type_name ")"
-	| ALIGNAS "(" constant_expression ")"
+	: ALIGNAS "(" type_name ")"			{ $$ = "<<<alignment-specifier>>>"; }
+	| ALIGNAS "(" constant_expression ")"		{ $$ = "<<<alignment-specifier>>>"; }
 	;
 
 declarator

@@ -119,6 +119,8 @@ class calcxx_driver;
 %type <std::string> struct_declaration
 %type <std::string> struct_declarator
 %type <std::string> struct_declarator_list
+%type <std::string> init_declarator_list
+%type <std::string> init_declarator
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -296,7 +298,7 @@ constant_expression
 
 declaration
 	: declaration_specifiers ";"				{ std::cout << "declaration detected: " << $1 << std::endl; }
-	| declaration_specifiers init_declarator_list ";"
+	| declaration_specifiers init_declarator_list ";"	{ std::cout << "declaration detected: " << $2 << " " << $1 << " " << "define-var" << std::endl; }
 	| static_assert_declaration
 	;
 
@@ -314,13 +316,13 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list "," init_declarator
+	: init_declarator				{ $$ = $1; }
+	| init_declarator_list "," init_declarator	{ $$ = $1 + " " + $3; }
 	;
 
 init_declarator
-	: declarator "=" initializer
-	| declarator
+	: declarator "=" initializer	{ $$ = $1 + " " + "init{" + "..." + "}"; }
+	| declarator			{ $$ = $1; }
 	;
 
 storage_class_specifier
@@ -369,7 +371,7 @@ struct_declaration_list
 
 struct_declaration
 	: specifier_qualifier_list ";"	/* for anonymous struct/union */	{ $$ = $1; }
-	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = std::string() + "struct-declarator-list{" + $2 + " " + $1 + " " + "}"; }
+	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = std::string() + $1 + " " + "struct-declarator-list{" + $2 + /* " " + $1 + " " +*/ "}"; }
 	| static_assert_declaration
 	;
 
@@ -431,14 +433,14 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator	{ $$ = $2 + $1; }
+	: pointer direct_declarator	{ $$ = $1 + " " + $2; }
 	| direct_declarator		{ $$ = $1; }
 	;
 
 direct_declarator
 	: IDENTIFIER				{ $$ = $1; }
 	| "(" declarator ")"			{ $$ = std::string("decl{") + $2 + "}"; }
-	| direct_declarator "[" "]"		{ $$ = $1 + " " + ">array[]"; }
+	| direct_declarator "[" "]"		{ $$ = std::string() + ">array[]" + " " + $1; }
 	| direct_declarator "[" "*" "]"
 	| direct_declarator "[" STATIC type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" STATIC assignment_expression "]"
@@ -446,10 +448,10 @@ direct_declarator
 	| direct_declarator "[" type_qualifier_list STATIC assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list "]"
-	| direct_declarator "[" assignment_expression "]"	{ $$ = $1 + " " + ">array{" + $3 + "}"; }
+	| direct_declarator "[" assignment_expression "]"	{ $$ = std::string() + ">array{" + $3 + "}" + " " + $1; }
 	| direct_declarator "(" parameter_type_list ")"
-	| direct_declarator "(" ")"				{ $$ = $1 + " " + ">function()"; }
-	| direct_declarator "(" identifier_list ")"		{ $$ = $1 + " " + ">function{" + $3 + "}"; }
+	| direct_declarator "(" ")"				{ $$ = std::string() + ">function()" + " " + $1; }
+	| direct_declarator "(" identifier_list ")"		{ $$ = std::string() + ">function{" + $3 + "}" + " " + $1; }
 	;
 
 pointer

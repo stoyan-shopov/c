@@ -110,6 +110,15 @@ class calcxx_driver;
 %type <std::string> function_specifier
 %type <std::string> declaration_specifiers
 %type <std::string> alignment_specifier
+%type <std::string> struct_declaration_list
+%type <std::string> direct_declarator
+%type <std::string> declarator
+%type <std::string> pointer
+%type <std::string> type_qualifier_list
+%type <std::string> identifier_list
+%type <std::string> struct_declaration
+%type <std::string> struct_declarator
+%type <std::string> struct_declarator_list
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -286,7 +295,7 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ";"
+	: declaration_specifiers ";"				{ std::cout << "declaration detected: " << $1 << std::endl; }
 	| declaration_specifiers init_declarator_list ";"
 	| static_assert_declaration
 	;
@@ -343,24 +352,24 @@ type_specifier
 	;
 
 struct_or_union_specifier
-	: struct_or_union "{" struct_declaration_list "}"		{ $$ = std::string("aggregate{...}") + " " + $1; }
-	| struct_or_union IDENTIFIER "{" struct_declaration_list "}"	{ $$ = std::string("aggregate{...}") + " " + $2 + " " + $1; }
+	: struct_or_union "{" struct_declaration_list "}"		{ $$ = std::string("aggregate{") + $3 + "}" + " " + $1; }
+	| struct_or_union IDENTIFIER "{" struct_declaration_list "}"	{ $$ = std::string("aggregate{") + $4 + "}" + " " + $2 + " " + $1; }
 	| struct_or_union IDENTIFIER					{ $$ = $2 + " " + $1; }
 	;
 
 struct_or_union
-	: STRUCT	{ $$ = "struct"; }
-	| UNION		{ $$ = "union"; }
+	: STRUCT	{ $$ = ">struct"; }
+	| UNION		{ $$ = ">union"; }
 	;
 
 struct_declaration_list
-	: struct_declaration
-	| struct_declaration_list struct_declaration
+	: struct_declaration				{ $$ = $1; }
+	| struct_declaration_list struct_declaration	{ $$ = $1 + " " + $2; }
 	;
 
 struct_declaration
-	: specifier_qualifier_list ";"	/* for anonymous struct/union */
-	| specifier_qualifier_list struct_declarator_list ";"
+	: specifier_qualifier_list ";"	/* for anonymous struct/union */	{ $$ = $1; }
+	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = std::string() + "struct-declarator-list{" + $2 + " " + $1 + " " + "}"; }
 	| static_assert_declaration
 	;
 
@@ -372,14 +381,14 @@ specifier_qualifier_list
 	;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list "," struct_declarator
+	: struct_declarator				{ $$ = $1; }
+	| struct_declarator_list "," struct_declarator	{ $$ = $1 + " " + $3; }
 	;
 
 struct_declarator
 	: ":" constant_expression
 	| declarator ":" constant_expression
-	| declarator
+	| declarator				{ $$ = $1; }
 	;
 
 enum_specifier
@@ -422,14 +431,14 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
+	: pointer direct_declarator	{ $$ = $2 + $1; }
+	| direct_declarator		{ $$ = $1; }
 	;
 
 direct_declarator
-	: IDENTIFIER
-	| "(" declarator ")"
-	| direct_declarator "[" "]"
+	: IDENTIFIER				{ $$ = $1; }
+	| "(" declarator ")"			{ $$ = std::string("decl{") + $2 + "}"; }
+	| direct_declarator "[" "]"		{ $$ = $1 + " " + ">array[]"; }
 	| direct_declarator "[" "*" "]"
 	| direct_declarator "[" STATIC type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" STATIC assignment_expression "]"
@@ -437,22 +446,22 @@ direct_declarator
 	| direct_declarator "[" type_qualifier_list STATIC assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list "]"
-	| direct_declarator "[" assignment_expression "]"
+	| direct_declarator "[" assignment_expression "]"	{ $$ = $1 + " " + ">array{" + $3 + "}"; }
 	| direct_declarator "(" parameter_type_list ")"
-	| direct_declarator "(" ")"
-	| direct_declarator "(" identifier_list ")"
+	| direct_declarator "(" ")"				{ $$ = $1 + " " + ">function()"; }
+	| direct_declarator "(" identifier_list ")"		{ $$ = $1 + " " + ">function{" + $3 + "}"; }
 	;
 
 pointer
-	: "*" type_qualifier_list pointer
-	| "*" type_qualifier_list
-	| "*" pointer
-	| "*"
+	: "*" type_qualifier_list pointer	{ $$ = $2 + " " + ">pointer" + " " + $3; }
+	| "*" type_qualifier_list		{ $$ = $2 + " " + ">pointer"; }
+	| "*" pointer				{ $$ = std::string(">pointer") + " " + $2; }
+	| "*"					{ $$ = ">pointer"; }
 	;
 
 type_qualifier_list
-	: type_qualifier
-	| type_qualifier_list type_qualifier
+	: type_qualifier			{ $$ = $1; }
+	| type_qualifier_list type_qualifier	{ $$ = $1 + " " + $2; }
 	;
 
 
@@ -473,8 +482,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER
-	| identifier_list "," IDENTIFIER
+	: IDENTIFIER				{ $$ = $1; }
+	| identifier_list "," IDENTIFIER	{ $$ = $1 + " " + $3; }
 	;
 
 type_name

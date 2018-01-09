@@ -297,8 +297,8 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ";"				{ std::cout << "declaration detected: " << $1 << std::endl; }
-	| declaration_specifiers init_declarator_list ";"	{ std::cout << "declaration detected: " << $2 << " " << $1 << " " << "define-variables" << std::endl; }
+	: declaration_specifiers ";"				{ std::cout << "declaration detected: " << $1 << " " << "declaration-end" << std::endl; }
+	| declaration_specifiers init_declarator_list ";"	{ std::cout << "declaration detected: " << $2 << " " << $1 << " " << "define-variables" << " " << "declaration-end" << std::endl; }
 	| static_assert_declaration
 	;
 

@@ -298,7 +298,7 @@ constant_expression
 
 declaration
 	: declaration_specifiers ";"				{ std::cout << "declaration detected: " << $1 << std::endl; }
-	| declaration_specifiers init_declarator_list ";"	{ std::cout << "declaration detected: " << $2 << " " << $1 << " " << "define-var" << std::endl; }
+	| declaration_specifiers init_declarator_list ";"	{ std::cout << "declaration detected: " << $2 << " " << $1 << " " << "define-variables" << std::endl; }
 	| static_assert_declaration
 	;
 
@@ -354,8 +354,8 @@ type_specifier
 	;
 
 struct_or_union_specifier
-	: struct_or_union "{" struct_declaration_list "}"		{ $$ = std::string("aggregate{ ") + $3 + " }" + " " + $1; }
-	| struct_or_union IDENTIFIER "{" struct_declaration_list "}"	{ $$ = std::string("aggregate{ ") + $4 + " }" + " " + $2 + " " + $1; }
+	: struct_or_union "{" struct_declaration_list "}"		{ $$ = std::string("aggregate{ ") + $3 + " }aggregate-end" + " " + $1; }
+	| struct_or_union IDENTIFIER "{" struct_declaration_list "}"	{ $$ = std::string("aggregate{ ") + $4 + " }aggregate-end" + " " + $2 + " " + $1; }
 	| struct_or_union IDENTIFIER					{ $$ = $2 + " " + $1; }
 	;
 
@@ -371,7 +371,7 @@ struct_declaration_list
 
 struct_declaration
 	: specifier_qualifier_list ";"	/* for anonymous struct/union */	{ $$ = $1; }
-	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = std::string() + $1 + " " + "struct-declarator-list{ " + $2 + /* " " + $1 + " " +*/ " }"; }
+	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = std::string() + $1 + " " + "struct-declarator-list{ " + $2 + /* " " + $1 + " " +*/ " }struct-declarator-list-end"; }
 	| static_assert_declaration
 	;
 
@@ -448,7 +448,7 @@ direct_declarator
 	| direct_declarator "[" type_qualifier_list STATIC assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list "]"
-	| direct_declarator "[" assignment_expression "]"	{ $$ = std::string() + ">array{ " + $3 + " }" + " " + $1; }
+	| direct_declarator "[" assignment_expression "]"	{ $$ = std::string() + ">array{ " + $3 + " }array-end" + " " + $1; }
 	| direct_declarator "(" parameter_type_list ")"
 	| direct_declarator "(" ")"				{ $$ = std::string() + ">function()" + " " + $1; }
 	| direct_declarator "(" identifier_list ")"		{ $$ = std::string() + ">function{ " + $3 + " }" + " " + $1; }

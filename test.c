@@ -6,7 +6,7 @@ int x   /**************  ;
 
 
 	 **************/   
-;
+, y, z;
 
 struct s1 { int x; };
 
@@ -18,9 +18,17 @@ struct SSS { int x, y, z;
 		long double dragon[10][20][30];
 	}
 	****************** vector[][23];
+
+	struct S2 str2;
 	float f;
 } str1;
 
+
+struct struct_tag
+{
+	int x, y, z;
+}
+str1;
 
 int foo()
 {

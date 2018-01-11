@@ -448,7 +448,7 @@ direct_declarator
 	| direct_declarator "[" type_qualifier_list STATIC assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list "]"
-	| direct_declarator "[" assignment_expression "]"	{ $$ = std::string() + ">array{ " + $3 + " }array-end" + " " + $1; }
+	| direct_declarator "[" assignment_expression "]"	{ $$ = $1 + " " + ">array{ " + $3 + " }array-end"; }
 	| direct_declarator "(" parameter_type_list ")"
 	| direct_declarator "(" ")"				{ $$ = std::string() + ">function()" + " " + $1; }
 	| direct_declarator "(" identifier_list ")"		{ $$ = std::string() + ">function{ " + $3 + " }" + " " + $1; }

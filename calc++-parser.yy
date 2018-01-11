@@ -433,7 +433,7 @@ alignment_specifier
 	;
 
 declarator
-	: pointer direct_declarator	{ $$ = $1 + " " + $2; }
+	: pointer direct_declarator	{ $$ = $2 + " " + $1; }
 	| direct_declarator		{ $$ = $1; }
 	;
 

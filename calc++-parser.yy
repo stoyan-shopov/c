@@ -370,7 +370,7 @@ struct_declaration_list
 	;
 
 struct_declaration
-	: specifier_qualifier_list ";"	/* for anonymous struct/union */	{ $$ = $1; }
+	: specifier_qualifier_list ";"	/* for anonymous struct/union */	{ $$ = $1 + " " + ">anonymous-aggregate"; }
 	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = std::string() + $1 + " " + "struct-declarator-list{ " + $2 + /* " " + $1 + " " +*/ " }struct-declarator-list-end"; }
 	| static_assert_declaration
 	;

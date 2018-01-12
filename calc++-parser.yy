@@ -439,7 +439,7 @@ declarator
 
 direct_declarator
 	: IDENTIFIER				{ $$ = $1; }
-	| "(" declarator ")"			{ $$ = std::string("decl{ ") + $2 + " }decl-end"; }
+	| "(" declarator ")"			{ $$ = /* std::string("decl{ ") + */$2/* + " }decl-end"*/; }
 	| direct_declarator "[" "]"		{ $$ = std::string() + $1 + " " + ">array[]"; }
 	| direct_declarator "[" "*" "]"
 	| direct_declarator "[" STATIC type_qualifier_list assignment_expression "]"

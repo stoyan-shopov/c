@@ -3,7 +3,7 @@ int x, y;
 int foo()()()()()();
 int foo(a,b,c)(a,b,c)(a,b,c)(a,b,c)(a,b,c)(a,b,c);
 // */
-int (*fpfi1(struct { int x; } *, struct x { int y; }*[], struct z { int y; }(*)[]))(struct foo *), (*fpfi(int (*)(long), int))(int, ...), (*foo(x))(z), a, b, c, *((****t)[2][3])[4];
+int (*fpfi1(struct { int x; } *, struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *), (*fpfi(int (*)(long), int))(int, ...), (*foo(x))(z), a, b, c, *((****t)[2][3])[4];
 
 int bar(a,b,c);
 /*

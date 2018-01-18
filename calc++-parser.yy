@@ -112,7 +112,9 @@ class calcxx_driver;
 %type <std::string> alignment_specifier
 %type <std::string> struct_declaration_list
 %type <std::string> direct_declarator
+%type <std::string> direct_abstract_declarator
 %type <std::string> declarator
+%type <std::string> abstract_declarator
 %type <std::string> pointer
 %type <std::string> type_qualifier_list
 %type <std::string> identifier_list
@@ -121,6 +123,9 @@ class calcxx_driver;
 %type <std::string> struct_declarator_list
 %type <std::string> init_declarator_list
 %type <std::string> init_declarator
+%type <std::string> parameter_type_list
+%type <std::string> parameter_list
+%type <std::string> parameter_declaration
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -440,7 +445,7 @@ declarator
 direct_declarator
 	: IDENTIFIER				{ $$ = $1; }
 	| "(" declarator ")"			{ $$ = /* std::string("decl{ ") + */$2/* + " }decl-end"*/; }
-	| direct_declarator "[" "]"		{ $$ = std::string() + $1 + " " + ">array[]"; }
+	| direct_declarator "[" "]"		{ $$ = $1 + " " + ">array[]"; }
 	| direct_declarator "[" "*" "]"
 	| direct_declarator "[" STATIC type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" STATIC assignment_expression "]"
@@ -449,9 +454,9 @@ direct_declarator
 	| direct_declarator "[" type_qualifier_list assignment_expression "]"
 	| direct_declarator "[" type_qualifier_list "]"
 	| direct_declarator "[" assignment_expression "]"	{ $$ = $1 + " " + ">array{ " + $3 + " }array-end"; }
-	| direct_declarator "(" parameter_type_list ")"
+	| direct_declarator "(" parameter_type_list ")"		{ $$ = $1 + " " + ">function-param-type-list{ " + $3 + " " + "}function-param-type-list-end"; }
 	| direct_declarator "(" ")"				{ $$ = $1 + " " + ">function()"; }
-	| direct_declarator "(" identifier_list ")"		{ $$ = $1 + " " + ">function{ " + $3 + " }"; }
+	| direct_declarator "(" identifier_list ")"		{ $$ = $1 + " " + ">function-id-list{ " + $3 + " " + "}function-id-list-end"; }
 	;
 
 pointer
@@ -469,18 +474,18 @@ type_qualifier_list
 
 parameter_type_list
 	: parameter_list "," ELLIPSIS
-	| parameter_list
+	| parameter_list			{ $$ = $1; }
 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list "," parameter_declaration
+	: parameter_declaration				{ $$ = $1; }
+	| parameter_list "," parameter_declaration	{ $$ = $3 + " " + "|param-list-boundary|" + " " + $1; }
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
+	: declaration_specifiers declarator		{ $$ = $2 + " " + $1; }
+	| declaration_specifiers abstract_declarator	{ $$ = $2 + " " + $1; }
+	| declaration_specifiers			{ $$ = $1; }
 	;
 
 identifier_list
@@ -489,19 +494,20 @@ identifier_list
 	;
 
 type_name
-	: specifier_qualifier_list abstract_declarator		{ $$ = "<<<type-name>>>"; }
-	| specifier_qualifier_list				{ $$ = "<<<type-name>>>"; }
+	: specifier_qualifier_list abstract_declarator		{ $$ = $2 + " " + $1; }
+	| specifier_qualifier_list				{ $$ = $1; }
 	;
 
 abstract_declarator
-	: pointer direct_abstract_declarator
-	| pointer
-	| direct_abstract_declarator
+	: pointer direct_abstract_declarator	{ $$ = $2 + " " + $1; }
+	| pointer				{ $$ = $1; }
+	| direct_abstract_declarator		{ $$ = $1; }
 	;
 
 direct_abstract_declarator
-	: "(" abstract_declarator ")"
-	| "[" "]"
+	: "(" abstract_declarator ")"		{ $$ = /* std::string("decl{ ") + */$2/* + " }decl-end"*/; }
+
+	| "[" "]"				{ $$ = ">abstract-declarator-array[]"; }
 	| "[" "*" "]"
 	| "[" STATIC type_qualifier_list assignment_expression "]"
 	| "[" STATIC assignment_expression "]"
@@ -509,7 +515,8 @@ direct_abstract_declarator
 	| "[" type_qualifier_list assignment_expression "]"
 	| "[" type_qualifier_list "]"
 	| "[" assignment_expression "]"
-	| direct_abstract_declarator "[" "]"
+	| direct_abstract_declarator "[" "]"	{ $$ = $1 + " " + ">abstract-declarator-array[]"; }
+
 	| direct_abstract_declarator "[" "*" "]"
 	| direct_abstract_declarator "[" STATIC type_qualifier_list assignment_expression "]"
 	| direct_abstract_declarator "[" STATIC assignment_expression "]"
@@ -517,10 +524,10 @@ direct_abstract_declarator
 	| direct_abstract_declarator "[" type_qualifier_list STATIC assignment_expression "]"
 	| direct_abstract_declarator "[" type_qualifier_list "]"
 	| direct_abstract_declarator "[" assignment_expression "]"
-	| "(" ")"
-	| "(" parameter_type_list ")"
-	| direct_abstract_declarator "(" ")"
-	| direct_abstract_declarator "(" parameter_type_list ")"
+	| "(" ")"				{ $$ = ">abstract-declarator-function()"; }
+	| "(" parameter_type_list ")"		{ $$ = std::string() + ">abstract-declarator-function-param-type-list{ " + $2 + " " + "}abstract-declarator-function-param-type-list-end"; }
+	| direct_abstract_declarator "(" ")"	{ $$ = $1 + " " + ">abstract-declarator-function()"; }
+	| direct_abstract_declarator "(" parameter_type_list ")"	{ $$ = $1 + " " + ">abstract-declarator-function-id-list{ " + $3 + " " + "}abstract-declarator-function-id-list-end"; }
 	;
 
 initializer

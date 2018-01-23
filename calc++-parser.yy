@@ -525,9 +525,9 @@ direct_abstract_declarator
 	| direct_abstract_declarator "[" type_qualifier_list "]"
 	| direct_abstract_declarator "[" assignment_expression "]"
 	| "(" ")"				{ $$ = ">abstract-declarator-function()"; }
-	| "(" parameter_type_list ")"		{ $$ = std::string() + ">abstract-declarator-function-param-type-list{ " + $2 + " " + "}abstract-declarator-function-param-type-list-end"; }
+	| "(" parameter_type_list ")"		{ $$ = std::string() + ">abstract-declarator-function-param-type-list{" + " " + $2 + " " + "}abstract-declarator-function-param-type-list-end"; }
 	| direct_abstract_declarator "(" ")"	{ $$ = $1 + " " + ">abstract-declarator-function()"; }
-	| direct_abstract_declarator "(" parameter_type_list ")"	{ $$ = $1 + " " + ">abstract-declarator-function-id-list{ " + $3 + " " + "}abstract-declarator-function-id-list-end"; }
+	| direct_abstract_declarator "(" parameter_type_list ")"	{ $$ = $1 + " " + ">abstract-declarator-function-param-type-list{" + " " + $3 + " " + "}abstract-declarator-function-param-type-list-end"; }
 	;
 
 initializer

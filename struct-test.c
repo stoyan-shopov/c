@@ -22,4 +22,6 @@ struct tag_innermost { struct x ****** y; };
 /*struct str { struct { int x; }; struct {struct {int y;};};};*/
 struct { struct { int x; }; struct {struct {int y;};};};
 
+struct { int x; } y;
+
 void foo();

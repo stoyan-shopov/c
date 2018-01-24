@@ -30,6 +30,7 @@ xfoo" >function() >pointer >function() >pointer >>int define-variables declarati
 int (*fpfi1(struct { int x; } *, void * (*(*[]))(int, int *), struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *);
 
 /* !!! the next two cases have an interesting parse !!! */
-int (*fpfi1(struct { int x; } *, void * (**[])(int, int *), struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *);
-int (*fpfi1(struct { int x; } *, void * (**asd[])(int, int *), struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *);
+int (*(*fpfi1(struct { int x; } *, void * (**[])(int, int *), struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *))(a,b,c);
+
+int (*(*fpfi1(struct { int x; } *, void * (**asd[])(int, int *), struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *))(a,b,c);
 

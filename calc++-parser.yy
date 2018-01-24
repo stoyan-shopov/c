@@ -473,24 +473,24 @@ type_qualifier_list
 
 
 parameter_type_list
-	: parameter_list "," ELLIPSIS
+	: parameter_list "," ELLIPSIS		{ $$ = $1 + " " + ">ellipsis"; }
 	| parameter_list			{ $$ = $1; }
 	;
 
 parameter_list
-	: parameter_declaration				{ $$ = $1; }
-	| parameter_list "," parameter_declaration	{ $$ = $3 + " " + "|param-list-boundary|" + " " + $1; }
+	: parameter_declaration				{ $$ = $1 + " " + ">parameter-list"; }
+	| parameter_list "," parameter_declaration	{ $$ = $1 + " " + $3 + " " + ">parameter-list"; }
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator		{ $$ = $2 + " " + $1; }
-	| declaration_specifiers abstract_declarator	{ $$ = $2 + " " + $1; }
-	| declaration_specifiers			{ $$ = $1; }
+	: declaration_specifiers declarator		{ $$ = $2 + " " + $1 + " " + ">parameter-declaration"; }
+	| declaration_specifiers abstract_declarator	{ $$ = $2 + " " + $1 + " " + ">abstract-parameter-declaration"; }
+	| declaration_specifiers			{ $$ = $1 + " " + ">parameter-declaration-specifiers"; }
 	;
 
 identifier_list
-	: IDENTIFIER				{ $$ = $1; }
-	| identifier_list "," IDENTIFIER	{ $$ = $1 + " " + $3; }
+	: IDENTIFIER				{ $$ = $1 + " " + ">id-list"; }
+	| identifier_list "," IDENTIFIER	{ $$ = $1 + " " + $3 + " " + ">id-list"; }
 	;
 
 type_name

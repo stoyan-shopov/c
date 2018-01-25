@@ -25,3 +25,37 @@ struct { struct { int x; }; struct {struct {int y;};};};
 struct { int x; } y;
 
 void foo();
+
+
+struct str
+{
+	struct
+	{
+		int x;
+	} s1;
+	struct sss
+	{
+		struct
+	       	{
+			int y;
+		};
+	}s2;
+};
+
+struct { int; };
+
+struct str
+{
+	struct
+	{
+		int r, (*(***x)[10])[20], * a, b[10], *c[10], z;
+	};
+	struct
+	{
+		struct
+	       	{
+			int y;
+		};
+	};
+};
+

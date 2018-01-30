@@ -302,8 +302,8 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ";"				{ std::cout << "declaration detected: " << $1 << " " << "declaration-end" << std::endl; }
-	| declaration_specifiers init_declarator_list ";"	{ std::cout << "declaration detected: " << $2 << " " << $1 << " " << "define-variables" << " " << "declaration-end" << std::endl; }
+	: declaration_specifiers ";"				{ driver.sforth_program << "( declaration detected:) " << $1 << " " << "declaration-end" << std::endl; }
+	| declaration_specifiers init_declarator_list ";"	{ driver.sforth_program << "( declaration detected:) " << $2 << " " << $1 << " " << "define-variables" << " " << "declaration-end" << std::endl; }
 	| static_assert_declaration
 	;
 
@@ -593,7 +593,7 @@ block_item
 
 expression_statement
 	: ";"
-	| expression ";"	{ std::cout << "expression statement detected: " << $1 << std::endl; }
+	| expression ";"	{ driver.sforth_program << "( expression statement detected:) " << $1 << std::endl; }
 	;
 
 selection_statement

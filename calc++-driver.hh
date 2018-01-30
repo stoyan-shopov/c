@@ -17,7 +17,7 @@ class calcxx_driver
 
 		std::map<std::string, int> variables;
 
-		int result;
+		std::stringstream sforth_program;
 		// Handling the scanner.
 		void scan_begin ();
 		void scan_end ();

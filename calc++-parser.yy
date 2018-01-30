@@ -56,7 +56,7 @@ class calcxx_driver;
 ;
 %token <std::string> IDENTIFIER "identifier"
 %token <std::string> TYPEDEF_NAME "typedef_name"
-%token <signed long long> I_CONSTANT "integer_constant"
+%token <unsigned long long> I_CONSTANT "integer_constant"
 %token  F_CONSTANT
 %token  STRING_LITERAL
 %token  FUNC_NAME

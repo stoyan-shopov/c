@@ -165,10 +165,10 @@ static yy::calcxx_parser::symbol_type check_type(void);
 
 {L}{A}*					{ return check_type(); }
 
-{HP}{H}+{IS}?				{ std::cout << "hex integer constant detected:" << yytext << std::endl; return yy::calcxx_parser::make_I_CONSTANT(-1, loc); }
-{NZ}{D}*{IS}?				{ return yy::calcxx_parser::make_I_CONSTANT(-2, loc); }
-"0"{O}*{IS}?				{ return yy::calcxx_parser::make_I_CONSTANT(-3, loc); }
-{CP}?"'"([^'\\\n]|{ES})+"'"		{ return yy::calcxx_parser::make_I_CONSTANT(-4, loc); }
+{HP}{H}+{IS}?				{ return yy::calcxx_parser::make_I_CONSTANT(std::stoull(yytext, 0, 0), loc); }
+{NZ}{D}*{IS}?				{ return yy::calcxx_parser::make_I_CONSTANT(std::stoull(yytext, 0, 0), loc); }
+"0"{O}*{IS}?				{ return yy::calcxx_parser::make_I_CONSTANT(std::stoull(yytext, 0, 0), loc); }
+{CP}?"'"([^'\\\n]|{ES})+"'"		{ return yy::calcxx_parser::make_I_CONSTANT(std::stoull(yytext, 0, 0), loc); }
 
 {D}+{E}{FS}?				{ return yy::calcxx_parser::make_F_CONSTANT(loc); }
 {D}*"."{D}+{E}?{FS}?			{ return yy::calcxx_parser::make_F_CONSTANT(loc); }

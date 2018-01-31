@@ -57,6 +57,7 @@ class calcxx_driver;
 %token <std::string> IDENTIFIER "identifier"
 %token <std::string> TYPEDEF_NAME "typedef_name"
 %token <unsigned long long> I_CONSTANT "integer_constant"
+%token <unsigned long long> ENUMERATION_CONSTANT "enumeration_constant"
 %token  F_CONSTANT
 %token  STRING_LITERAL
 %token  FUNC_NAME
@@ -304,7 +305,7 @@ constant_expression
 declaration
 	: declaration_specifiers ";"				{ driver.sforth_program << "( declaration detected:) " << $1 << " " << "declaration-end" << std::endl; }
 	| declaration_specifiers init_declarator_list ";"	{ driver.sforth_program << "( declaration detected:) " << $2 << " " << $1 << " " << "define-variables" << " " << "declaration-end" << std::endl; }
-	| static_assert_declaration
+	| static_assert_declaration				{ driver.sforth_program << "( static assert declaration detected:) " << "( ...)" << std::endl; }
 	;
 
 declaration_specifiers

@@ -57,6 +57,7 @@ extern int sym_type(const char *);  /* returns type from symbol table */
 #define sym_type(identifier) yy::calcxx_parser::token::TOK_IDENTIFIER /* with no symbol table, fake it */
 
 static yy::calcxx_parser::symbol_type check_type(void);
+static void count_and_advance_lines(void) { int i; for (i = 0; i < yyleng; ++ i) if (yytext[i] == '\n') loc.lines(1); else loc.columns(1); loc.step(); }
 %}
 
 %%
@@ -67,7 +68,6 @@ static yy::calcxx_parser::symbol_type check_type(void);
 %}
 
 {blank}+   loc.step ();
-[\n]+      loc.lines (yyleng); loc.step ();
 <<EOF>>    return yy::calcxx_parser::make_END(loc);
 
 
@@ -177,7 +177,7 @@ static yy::calcxx_parser::symbol_type check_type(void);
 {HP}{H}*"."{H}+{P}{FS}?			{ return yy::calcxx_parser::make_F_CONSTANT(loc); }
 {HP}{H}+"."{P}{FS}?			{ return yy::calcxx_parser::make_F_CONSTANT(loc); }
 
-({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ return yy::calcxx_parser::make_STRING_LITERAL(loc); }
+({SP}?\"([^"\\\n]|{ES})*\"{WS}*)+	{ count_and_advance_lines(); return yy::calcxx_parser::make_STRING_LITERAL(loc); }
 
 "..."					{ return yy::calcxx_parser::make_ELLIPSIS(loc); }
 ">>="					{ return yy::calcxx_parser::make_RIGHT_ASSIGN(loc); }
@@ -226,7 +226,7 @@ static yy::calcxx_parser::symbol_type check_type(void);
 "|"					{ return yy::calcxx_parser::make_PIPE(loc); }
 "?"					{ return yy::calcxx_parser::make_QUESTION_MARK(loc); }
 
-{WS}+					{ /* whitespace separates tokens */ }
+{WS}+					{ count_and_advance_lines(); /* whitespace separates tokens */ }
 .					{ /* discard bad characters */ }
 
 

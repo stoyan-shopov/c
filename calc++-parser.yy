@@ -137,6 +137,7 @@ class calcxx_driver;
 %type <std::string> declaration
 %type <std::string> function_definition
 %type <std::string> block_item
+%type <std::string> jump_statement
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -309,7 +310,7 @@ expression
 	;
 
 constant_expression
-	: conditional_expression	/* with constraints */	{ $$ = "constant-expression{" + ' ' + $1 + ' ' + "}constant-expression"; }
+	: conditional_expression	/* with constraints */	{ $$ = std::string("constant-expression{") + ' ' + $1 + ' ' + "}constant-expression"; }
 	;
 
 declaration
@@ -574,11 +575,11 @@ static_assert_declaration
 
 statement
 	: labeled_statement		{ $$ = $1; }
-	| compound_statement
-	| expression_statement
+	| compound_statement		{ $$ = $1; }
+	| expression_statement		{ $$ = $1; }
 	| selection_statement		{ $$ = $1; }
-	| iteration_statement
-	| jump_statement
+	| iteration_statement		{ $$ = $1; }
+	| jump_statement		{ $$ = $1; }
 	;
 
 labeled_statement
@@ -598,13 +599,13 @@ block_item_list
 	;
 
 block_item
-	: declaration
+	: declaration	{ $$ = $1; }
 	| statement	{ $$ = $1; }
 	;
 
 expression_statement
 	: ";"			{ $$ = "empty-expression"; }
-	| expression ";"	{ driver.sforth_program << "( expression statement detected:) " << $1 << std::endl; }
+	| expression ";"	{ $$ = "expression{" + ' ' + $1 + ' ' + "}expression"; }
 	;
 
 selection_statement

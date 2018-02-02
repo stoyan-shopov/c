@@ -34,3 +34,4 @@ int (*(*fpfi1(struct { int x; } *, void * (**[])(int, int *), struct x { int y; 
 
 int (*(*fpfi1(struct { int x; } *, void * (**asd[])(int, int *), struct x { int y; }*[], struct z { int y; }(*xxx)[]))(struct foo *))(a,b,c);
 
+int x{}

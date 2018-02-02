@@ -97,6 +97,7 @@ class calcxx_driver;
 %type <std::string> logical_and_expression
 %type <std::string> logical_or_expression
 %type <std::string> conditional_expression
+%type <std::string> constant_expression
 %type <std::string> assignment_operator
 %type <std::string> assignment_expression
 %type <std::string> expression
@@ -127,6 +128,15 @@ class calcxx_driver;
 %type <std::string> parameter_type_list
 %type <std::string> parameter_list
 %type <std::string> parameter_declaration
+%type <std::string> statement
+%type <std::string> labeled_statement
+%type <std::string> compound_statement
+%type <std::string> selection_statement
+%type <std::string> iteration_statement
+%type <std::string> block_item_list
+%type <std::string> expression_statement
+%type <std::string> declaration
+%type <std::string> function_definition
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -299,13 +309,13 @@ expression
 	;
 
 constant_expression
-	: conditional_expression	/* with constraints */
+	: conditional_expression	/* with constraints */	{ $$ = "constant-expression{" + ' ' + $1 + ' ' + "}constant-expression"; }
 	;
 
 declaration
-	: declaration_specifiers ";"				{ driver.sforth_program << "( declaration detected:) " << $1 << " " << "declaration-end" << std::endl; }
-	| declaration_specifiers init_declarator_list ";"	{ driver.sforth_program << "( declaration detected:) " << $2 << " " << $1 << " " << "define-variables" << " " << "declaration-end" << std::endl; }
-	| static_assert_declaration				{ driver.sforth_program << "( static assert declaration detected:) " << "( ...)" << std::endl; }
+	: declaration_specifiers ";"				{ $$ = $1 + ' ' + "declaration-end"; }
+	| declaration_specifiers init_declarator_list ";"	{ $$ = $2 + ' ' + $1 + ' ' + "define-variables" + ' ' + "declaration-end"; }
+	| static_assert_declaration				{ $$ = "( static assert declaration detected:) "; }
 	;
 
 declaration_specifiers
@@ -355,7 +365,7 @@ type_specifier
 	| IMAGINARY	  	/* non-mandated extension */	{ $$ = ">>imaginary"; }
 	| atomic_type_specifier		{ $$ = $1; }
 	| struct_or_union_specifier	{ $$ = $1; }
-	| enum_specifier
+	| enum_specifier		{ $$ = "enum..."; }
 	| TYPEDEF_NAME		/* after it has been defined as such */	{ $$ = $1; }
 	;
 
@@ -378,7 +388,7 @@ struct_declaration_list
 struct_declaration
 	: specifier_qualifier_list ";"	/* for anonymous struct/union */	{ $$ = $1 + " " + ">anonymous-aggregate"; }
 	| specifier_qualifier_list struct_declarator_list ";"			{ $$ = $2 + " " + $1 + " " + ">struct-declaration"; }
-	| static_assert_declaration
+	| static_assert_declaration						{ $$ = "static-assert..."; }
 	;
 
 specifier_qualifier_list
@@ -394,8 +404,8 @@ struct_declarator_list
 	;
 
 struct_declarator
-	: ":" constant_expression
-	| declarator ":" constant_expression
+	: ":" constant_expression		{ $$ = $2 + ' ' + "declare-empty-bitfield"; }
+	| declarator ":" constant_expression	{ $$ = $1 + ' ' + $3 + ' ' + "declare-bitfield"; }
 	| declarator				{ $$ = $1; }
 	;
 
@@ -572,14 +582,14 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ":" statement
-	| CASE constant_expression ":" statement
-	| DEFAULT ":" statement
+	: IDENTIFIER ":" statement			{ $$ = $3 + ' ' + $1 + ' ' + ">label"; }
+	| CASE constant_expression ":" statement	{ $$ = $4 + ' ' + $2 + ' ' + ">case-label"; }
+	| DEFAULT ":" statement				{ $$ = $3 + ' ' + ">default-case"; }
 	;
 
 compound_statement
-	: "{" "}"
-	| "{"  block_item_list "}"
+	: "{" "}"			{ $$ = "empty-compound-statement"; }
+	| "{"  block_item_list "}"	{ $$ = std::string("compound-statement{") + ' ' + $2 + ' ' + "}compound-statement"; }
 	;
 
 block_item_list
@@ -593,23 +603,23 @@ block_item
 	;
 
 expression_statement
-	: ";"
+	: ";"			{ $$ = "empty-expression"; }
 	| expression ";"	{ driver.sforth_program << "( expression statement detected:) " << $1 << std::endl; }
 	;
 
 selection_statement
-	: IF "(" expression ")" statement ELSE statement
-	| IF "(" expression ")" statement
-	| SWITCH "(" expression ")" statement
+	: IF "(" expression ")" statement ELSE statement	{ $$ = $3 + ' ' + "(if)" + ' ' + $5 + ' ' + "(else)" + ' ' + $7 + ' ' + "(then)"; }
+	| IF "(" expression ")" statement			{ $$ = $3 + ' ' + "(if)" + ' ' + $5 + ' ' + "(then)"; }
+	| SWITCH "(" expression ")" statement			{ $$ = $3 + ' ' + "(case)" + ' ' + $5 + ' ' + "(endcase)"; }
 	;
 
 iteration_statement
-	: WHILE "(" expression ")" statement
-	| DO statement WHILE "(" expression ")" ";"
-	| FOR "(" expression_statement expression_statement ")" statement
-	| FOR "(" expression_statement expression_statement expression ")" statement
-	| FOR "(" declaration expression_statement ")" statement
-	| FOR "(" declaration expression_statement expression ")" statement
+	: WHILE "(" expression ")" statement						{ $$ = std::string("(begin)") + ' ' + $3 + ' ' + "(while)" + ' ' + $5 + ' ' + "(repeat)"; }
+	| DO statement WHILE "(" expression ")" ";"					{ $$ = std::string("(begin)") + ' ' + $2 + ' ' + ' ' + $5 + ' ' + "(0<>) (invert) (repeat)"; }
+	| FOR "(" expression_statement expression_statement ")" statement		{ $$ = "for-loop..."; }
+	| FOR "(" expression_statement expression_statement expression ")" statement	{ $$ = "for-loop..."; }
+	| FOR "(" declaration expression_statement ")" statement			{ $$ = "for-loop..."; }
+	| FOR "(" declaration expression_statement expression ")" statement		{ $$ = "for-loop..."; }
 	;
 
 jump_statement
@@ -626,13 +636,13 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition
-	| declaration
+	: function_definition	{ driver.sforth_program << "( function definition detected:) " << $1 << std::endl; }
+	| declaration		{ driver.sforth_program << "( file-level declaration detected:) " << $1 << std::endl; }
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
+	: declaration_specifiers declarator declaration_list compound_statement	{ $$ = "function-definition..."; }
+	| declaration_specifiers declarator compound_statement			{ $$ = $3 + ' ' + $2 + ' ' + $1 + ' ' + "define-funcion"; }
 	;
 
 declaration_list

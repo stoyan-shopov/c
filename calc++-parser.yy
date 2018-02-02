@@ -66,7 +66,6 @@ class calcxx_driver;
 %token	AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
 %token	SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token	XOR_ASSIGN OR_ASSIGN
-%token	ENUMERATION_CONSTANT
 
 %token	TYPEDEF EXTERN STATIC AUTO REGISTER INLINE
 %token	CONST RESTRICT VOLATILE
@@ -137,6 +136,7 @@ class calcxx_driver;
 %type <std::string> expression_statement
 %type <std::string> declaration
 %type <std::string> function_definition
+%type <std::string> block_item
 
 %printer { yyoutput << $$; } <*>;
 %%
@@ -573,10 +573,10 @@ static_assert_declaration
 	;
 
 statement
-	: labeled_statement
+	: labeled_statement		{ $$ = $1; }
 	| compound_statement
 	| expression_statement
-	| selection_statement
+	| selection_statement		{ $$ = $1; }
 	| iteration_statement
 	| jump_statement
 	;
@@ -593,13 +593,13 @@ compound_statement
 	;
 
 block_item_list
-	: block_item
-	| block_item_list block_item
+	: block_item			{ $$ = std::string("block-item{") + ' ' + $1 + ' ' + "}block-item"; }
+	| block_item_list block_item	{ $$ = $1 + ' ' + "block-item{" + ' ' + $2 + ' ' + "}block-item"; }
 	;
 
 block_item
 	: declaration
-	| statement
+	| statement	{ $$ = $1; }
 	;
 
 expression_statement

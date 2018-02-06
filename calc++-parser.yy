@@ -604,8 +604,8 @@ block_item
 	;
 
 expression_statement
-	: ";"			{ $$ = "empty-expression"; }
-	| expression ";"	{ $$ = "expression{" + ' ' + $1 + ' ' + "}expression"; }
+	: ";"			{ $$ = "empty-expression-statement"; }
+	| expression ";"	{ $$ = std::string("expression{") + ' ' + $1 + ' ' + "}expression"; }
 	;
 
 selection_statement

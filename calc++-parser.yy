@@ -314,8 +314,8 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ";"				{ $$ = $1 + ' ' + "declaration-end"; }
-	| declaration_specifiers init_declarator_list ";"	{ $$ = $2 + ' ' + $1 + ' ' + "define-variables" + ' ' + "declaration-end"; }
+	: declaration_specifiers ";"				{ $$ = std::string("declaration-without-declarator-list{") + ' ' + $1 + ' ' + "}declaration-without-declarator-list"; }
+	| declaration_specifiers init_declarator_list ";"	{ $$ = std::string("declaration-with-declarator-list{") + ' ' + $2 + ' ' + $1 + ' ' + "define-variables" + ' ' + "}declaration-with-declarator-list"; }
 	| static_assert_declaration				{ $$ = "( static assert declaration detected:) "; }
 	;
 

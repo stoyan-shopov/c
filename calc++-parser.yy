@@ -594,13 +594,13 @@ compound_statement
 	;
 
 block_item_list
-	: block_item			{ $$ = std::string("block-item{") + ' ' + $1 + ' ' + "}block-item"; }
+	: block_item			{ $$ = + ' ' + $1 + ' ' + "}block-item"; }
 	| block_item_list block_item	{ $$ = $1 + ' ' + "block-item{" + ' ' + $2 + ' ' + "}block-item"; }
 	;
 
 block_item
-	: declaration	{ $$ = $1; }
-	| statement	{ $$ = $1; }
+	: declaration	{ $$ = std::string("block-declaration{") + ' ' + $1 + ' ' + "}block-declaration"; }
+	| statement	{ $$ = std::string("statement{") + ' ' + $1 + ' ' + "}statement"; }
 	;
 
 expression_statement

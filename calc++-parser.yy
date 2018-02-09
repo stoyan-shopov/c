@@ -187,8 +187,8 @@ postfix_expression
 	| postfix_expression "(" argument_expression_list ")"	{ $$ = $1 + " " + "(<<<function-call-with-arguments>>>)"; }
 	| postfix_expression "." IDENTIFIER			{ $$ = $1 + " " + $3 + " " + ".member-access"; }
 	| postfix_expression PTR_OP IDENTIFIER			{ $$ = $1 + " " + $3 + " " + "->member-access"; }
-	| postfix_expression INC_OP				{ $$ = "lval{ " + $1 + " }" + " " + "postfix++"; }
-	| postfix_expression DEC_OP				{ $$ = "lval{ " + $1 + " }" + " " + "postfix--"; }
+	| postfix_expression INC_OP				{ $$ = "lval{ " + $1 + " }lval" + " " + "postfix++"; }
+	| postfix_expression DEC_OP				{ $$ = "lval{ " + $1 + " }lval" + " " + "postfix--"; }
 	| "(" type_name ")" "{" initializer_list "}"		{ $$ = "<<<compound-literal>>>"; }
 	| "(" type_name ")" "{" initializer_list "," "}"	{ $$ = "<<<compound-literal>>>"; }
 	;
